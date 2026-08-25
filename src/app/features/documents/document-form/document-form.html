@@ -1,0 +1,165 @@
+<h1>
+  {{ documentId ? 'Editar documento' : 'Nuevo documento' }}
+</h1>
+
+<form
+  [formGroup]="form"
+  (ngSubmit)="save()"
+>
+
+  <div>
+    <label>
+      Título *
+    </label>
+
+    <input
+      type="text"
+      formControlName="title"
+    >
+
+    @if (
+      form.controls.title.invalid &&
+      form.controls.title.touched
+    ) {
+      <small>
+        El título es obligatorio.
+      </small>
+    }
+  </div>
+
+
+  <div>
+    <label>
+      Tipo de documento *
+    </label>
+
+    <select
+      formControlName="documentType"
+    >
+      <option value="">
+        Seleccione
+      </option>
+
+      <option value="ESTATUTO">
+        Estatuto
+      </option>
+
+      <option value="REGLAMENTO">
+        Reglamento
+      </option>
+
+      <option value="DIRECTIVA">
+        Directiva
+      </option>
+
+      <option value="RESOLUCION">
+        Resolución
+      </option>
+
+      <option value="MANUAL">
+        Manual
+      </option>
+
+      <option value="LINEAMIENTO">
+        Lineamiento
+      </option>
+
+      <option value="CONVENIO">
+        Convenio
+      </option>
+
+      <option value="OTRO">
+        Otro
+      </option>
+    </select>
+  </div>
+
+
+  <div>
+    <label>
+      Año
+    </label>
+
+    <input
+      type="number"
+      formControlName="year"
+    >
+  </div>
+
+
+  <div>
+    <label>
+      Unidad responsable
+    </label>
+
+    <input
+      type="text"
+      formControlName="responsibleUnit"
+    >
+  </div>
+
+
+  <div>
+    <label>
+      Fecha de publicación
+    </label>
+
+    <input
+      type="date"
+      formControlName="publicationDate"
+    >
+  </div>
+
+
+  <div>
+    <label>
+      Vigencia
+    </label>
+
+    <select
+      formControlName="validityStatus"
+    >
+      <option value="VIGENTE">
+        Vigente
+      </option>
+
+      <option value="DEROGADO">
+        Derogado
+      </option>
+
+      <option value="DESCONOCIDO">
+        Desconocido
+      </option>
+    </select>
+  </div>
+
+
+  <div>
+    <label>
+      URL de origen
+    </label>
+
+    <input
+      type="url"
+      formControlName="sourceUrl"
+    >
+  </div>
+
+
+  <br>
+
+  <button
+    type="submit"
+    [disabled]="saving"
+  >
+    {{ saving ? 'Guardando...' : 'Guardar' }}
+  </button>
+
+  <button
+    type="button"
+    (click)="cancel()"
+  >
+    Cancelar
+  </button>
+
+</form>

@@ -1,0 +1,202 @@
+@if (document) {
+
+  <p>
+    <a routerLink="/documents">
+      ← Volver
+    </a>
+  </p>
+
+
+  <h1>
+    {{ document.code }}
+  </h1>
+
+  <h2>
+    {{ document.title }}
+  </h2>
+
+
+  <dl>
+
+    <dt>Tipo</dt>
+    <dd>
+      {{ document.documentType }}
+    </dd>
+
+    <dt>Año</dt>
+    <dd>
+      {{ document.year }}
+    </dd>
+
+    <dt>Unidad responsable</dt>
+    <dd>
+      {{ document.responsibleUnit || '-' }}
+    </dd>
+
+    <dt>Vigencia</dt>
+    <dd>
+      {{ document.validityStatus }}
+    </dd>
+
+    <dt>Estado de procesamiento</dt>
+    <dd>
+      {{ document.processingStage }}
+    </dd>
+
+  </dl>
+
+
+  <p>
+    <a
+      [routerLink]="[
+        '/documents',
+        document.id,
+        'edit'
+      ]"
+    >
+      Editar datos
+    </a>
+  </p>
+
+
+  <hr>
+
+
+  <h2>
+    Documento original
+  </h2>
+
+
+  <input
+    type="file"
+    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.tif,.tiff"
+    (change)="onFileSelected($event)"
+  >
+
+
+  @if (selectedFile) {
+
+    <p>
+      Archivo seleccionado:
+      <strong>
+        {{ selectedFile.name }}
+      </strong>
+    </p>
+
+    <p>
+      Tamaño:
+      {{ formatBytes(selectedFile.size) }}
+    </p>
+
+  }
+
+
+  <button
+    type="button"
+    (click)="uploadOriginal()"
+    [disabled]="
+      !selectedFile ||
+      uploading
+    "
+  >
+
+    {{
+      uploading
+        ? 'Subiendo...'
+        : 'Guardar original'
+    }}
+
+  </button>
+
+
+  @if (errorMessage) {
+
+    <p>
+      {{ errorMessage }}
+    </p>
+
+  }
+
+
+  <hr>
+
+
+  <h2>
+    Archivos registrados
+  </h2>
+
+
+  @if (files$ | async; as files) {
+
+    @if (files.length === 0) {
+
+      <p>
+        Todavía no existen archivos.
+      </p>
+
+    } @else {
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Etapa</th>
+            <th>Versión</th>
+            <th>Archivo</th>
+            <th>Tamaño</th>
+            <th>Actual</th>
+            <th>SHA-256</th>
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          @for (
+            file of files;
+            track file.id
+          ) {
+
+            <tr>
+
+              <td>
+                {{ file.stage }}
+              </td>
+
+              <td>
+                v{{ file.version }}
+              </td>
+
+              <td>
+                {{ file.filename }}
+              </td>
+
+              <td>
+                {{ formatBytes(file.size) }}
+              </td>
+
+              <td>
+                {{ file.current ? 'Sí' : 'No' }}
+              </td>
+
+              <td>
+                <code>
+                  {{ file.sha256 }}
+                </code>
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    }
+
+  }
+
+}

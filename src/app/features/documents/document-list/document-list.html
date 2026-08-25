@@ -1,0 +1,103 @@
+<h1>Corpus documental</h1>
+
+<p>
+  <a routerLink="/documents/new">
+    Nuevo documento
+  </a>
+</p>
+
+@if (documents$ | async; as documents) {
+
+@if (documents.length === 0) {
+
+<p>
+  No existen documentos registrados.
+</p>
+
+} @else {
+
+<table>
+
+  <thead>
+    <tr>
+      <th>Código</th>
+      <th>Documento</th>
+      <th>Tipo</th>
+      <th>Año</th>
+      <th>Vigencia</th>
+      <th>Etapa</th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+    @for (
+    document of documents;
+    track document.id
+    ) {
+
+    <tr>
+
+      <td>
+        {{ document.code }}
+      </td>
+
+      <td>
+        {{ document.title }}
+      </td>
+
+      <td>
+        {{ document.documentType }}
+      </td>
+
+      <td>
+        {{ document.year }}
+      </td>
+
+      <td>
+        {{ document.validityStatus }}
+      </td>
+
+      <td>
+        {{ document.processingStage }}
+      </td>
+
+
+
+      <td>
+
+        <a [routerLink]="[
+      '/documents',
+      document.id
+    ]">
+          Abrir
+        </a>
+
+        &nbsp;
+
+        <a [routerLink]="[
+      '/documents',
+      document.id,
+      'edit'
+    ]">
+          Editar
+        </a>
+
+      </td>
+
+    </tr>
+
+    }
+
+  </tbody>
+
+</table>
+
+}
+
+}
+
+@else {
+no hubo conexion
+}
