@@ -1,0 +1,104 @@
+<h2>
+  Metadatos documentales
+</h2>
+
+<form
+  [formGroup]="form"
+  (ngSubmit)="save()"
+>
+
+  <div>
+    <label>
+      Resolución de aprobación
+    </label>
+
+    <input
+      type="text"
+      formControlName="resolution"
+    >
+  </div>
+
+
+  <div>
+    <label>
+      Fecha de aprobación
+    </label>
+
+    <input
+      type="date"
+      formControlName="approvalDate"
+    >
+  </div>
+
+
+  <div>
+    <label>
+      Número de páginas
+    </label>
+
+    <input
+      type="number"
+      formControlName="pages"
+    >
+  </div>
+
+
+  <div>
+    <label>
+      Idioma
+    </label>
+
+    <input
+      type="text"
+      formControlName="language"
+    >
+  </div>
+
+
+  <div>
+    <label>
+      Descripción
+    </label>
+
+    <textarea
+      formControlName="description"
+    ></textarea>
+  </div>
+
+
+  <div>
+    <label>
+      Palabras clave
+    </label>
+
+    <input
+      type="text"
+      formControlName="keywords"
+      placeholder="investigación, docentes, proyectos"
+    >
+  </div>
+
+
+  <div>
+    <label>
+      Observaciones
+    </label>
+
+    <textarea
+      formControlName="notes"
+    ></textarea>
+  </div>
+
+
+  <button
+    type="submit"
+    [disabled]="saving"
+  >
+    {{
+      saving
+        ? 'Guardando...'
+        : 'Guardar metadatos'
+    }}
+  </button>
+
+</form>

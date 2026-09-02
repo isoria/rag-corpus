@@ -1,149 +1,113 @@
-import {
-  AsyncPipe,
-  DatePipe
-} from '@angular/common';
-
-import {
-  Component,
-  inject,
-  OnInit
-} from '@angular/core';
-
-import {
-  ActivatedRoute,
-  RouterLink
-} from '@angular/router';
-
+import { AsyncPipe } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
-
-import {
-  CorpusDocument
-} from '../../../core/models/corpus-document.model';
-
-import {
-  DocumentFile
-} from '../../../core/models/document-file.model';
-
-import {
-  DocumentService
-} from '../../../core/services/document.service';
-
-import {
-  DocumentFileService
-} from '../../../core/services/document-file.service';
-
+import { CorpusDocument } from '../../../core/models/corpus-document.model';
+import { DocumentFile, DocumentFileStage } from '../../../core/models/document-file.model';
+import { DocumentService } from '../../../core/services/document.service';
+import { DocumentFileService } from '../../../core/services/document-file.service';
+import { DocumentMetadata } from '../document-metadata/document-metadata';
+import { ChunkEditor } from '../../chunks/chunk-editor/chunk-editor';
 
 @Component({
   selector: 'app-document-detail',
   standalone: true,
-
   imports: [
     AsyncPipe,
-    RouterLink
+    RouterLink,
+    DocumentMetadata,
+    ChunkEditor
   ],
-
-  templateUrl:
-    './document-detail.html',
-
-  styleUrl:
-    './document-detail.css'
+  templateUrl: './document-detail.html',
+  styleUrl: './document-detail.css'
 })
-export class DocumentDetail
-  implements OnInit {
-
-  private route =
-    inject(ActivatedRoute);
-
-  private documentService =
-    inject(DocumentService);
-
-  private documentFileService =
-    inject(DocumentFileService);
-
-
-  document:
-    CorpusDocument | null = null;
-
-  files$:
-    Observable<DocumentFile[]> | null = null;
-
-  selectedFile:
-    File | null = null;
-
-  uploading =
-    false;
-
-  errorMessage =
-    '';
-
+export class DocumentDetail implements OnInit {
+  private route = inject(ActivatedRoute);
+  private documentService = inject(DocumentService);
+  private fileService = inject(DocumentFileService);
+  document: CorpusDocument | null = null;
+  files$: Observable<DocumentFile[]> | null = null;
+  selectedFiles: Partial< Record<DocumentFileStage, File[]>> = {};
+  uploadingStage: DocumentFileStage | null = null;
+  errorMessage = '';
 
   async ngOnInit(): Promise<void> {
-
-    const id =
-      this.route.snapshot.paramMap.get('id');
+    const id = this.route.snapshot.paramMap.get('id');
 
     if (!id) {
       return;
     }
 
-    this.document =
-      await this.documentService.getById(id);
+    this.document = await this.documentService.getById(id);
 
     if (!this.document) {
       return;
     }
 
     this.files$ =
-      this.documentFileService.files$(id);
+      this.fileService.files$(id);
   }
 
-
-  onFileSelected(
-    event: Event
-  ): void {
-
-    const input =
-      event.target as HTMLInputElement;
-
-    this.selectedFile =
-      input.files?.[0] ?? null;
+  onFilesSelected( event: Event, stage: DocumentFileStage ): void {
+    const input = event.target as HTMLInputElement;
+    this.selectedFiles[stage] = input.files
+        ? Array.from(input.files)
+        : [];
   }
 
+  async upload( stage: DocumentFileStage ): Promise<void> {
+    if (!this.document?.id) {
+      return;
+    }
 
-  async uploadOriginal(): Promise<void> {
+    const files = this.selectedFiles[stage];
 
-    if (
-      !this.document?.id ||
-      !this.selectedFile
-    ) {
+    if (!files?.length) {
       return;
     }
 
     this.errorMessage = '';
-    this.uploading = true;
+    this.uploadingStage = stage;
 
     try {
 
-      await this.documentFileService
-        .uploadOriginal(
-          this.document.id,
-          this.document.code,
-          this.selectedFile
-        );
+      await this.fileService.uploadFiles(
+        this.document.id,
+        this.document.code,
+        stage,
+        files
+      );
 
-      this.selectedFile = null;
+      this.selectedFiles[stage] = [];
+
+      /*
+       * Recargamos los datos generales
+       * porque processingStage cambió.
+       */
+      this.document =
+        await this.documentService.getById(
+          this.document.id
+        );
 
     } catch (error) {
 
       console.error(error);
 
       this.errorMessage =
-        'No se pudo cargar el archivo.';
+        `No se pudieron cargar los archivos de la etapa ${stage}.`;
 
     } finally {
 
-      this.uploading = false;
+      this.uploadingStage = null;
     }
+  }
+
+
+  hasFilesSelected(
+    stage: DocumentFileStage
+  ): boolean {
+
+    return !!this.selectedFiles[stage]?.length;
   }
 
 
@@ -151,7 +115,7 @@ export class DocumentDetail
     bytes: number
   ): string {
 
-    if (bytes === 0) {
+    if (!bytes) {
       return '0 B';
     }
 

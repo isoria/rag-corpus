@@ -1,1 +1,806 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* =========================================================
+   VARIABLES GENERALES
+   ========================================================= */
+
+:root {
+  --primary: #1e3a5f;
+  --primary-hover: #162c49;
+  --secondary: #64748b;
+
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #b91c1c;
+  --info: #0369a1;
+
+  --background: #f5f7fa;
+  --surface: #ffffff;
+  --surface-secondary: #f8fafc;
+
+  --text: #1e293b;
+  --text-secondary: #64748b;
+  --border: #dbe2ea;
+
+  --radius: 8px;
+
+  --shadow:
+    0 1px 3px rgba(0, 0, 0, 0.08);
+
+  --shadow-lg:
+    0 4px 12px rgba(0, 0, 0, 0.08);
+
+  --container-width: 1400px;
+}
+
+
+/* =========================================================
+   RESET / BASE
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  background: var(--background);
+  color: var(--text);
+
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--text);
+  margin-top: 0;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: 1.35rem;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-size: 1.1rem;
+}
+
+p {
+  margin-top: 0;
+}
+
+
+/* =========================================================
+   CONTENEDOR GENERAL
+   ========================================================= */
+
+main {
+  width: 100%;
+  max-width: var(--container-width);
+
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 24px;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+header {
+  background: var(--primary);
+  color: white;
+
+  padding: 0 24px;
+
+  box-shadow: var(--shadow);
+}
+
+header h1,
+header h2,
+header h3 {
+  color: white;
+}
+
+header h2 {
+  margin: 0;
+  padding: 18px 0 8px;
+}
+
+header nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  padding-bottom: 14px;
+}
+
+header nav a {
+  color: white;
+  font-weight: 500;
+}
+
+header nav a:hover {
+  text-decoration: none;
+  opacity: 0.85;
+}
+
+header hr {
+  display: none;
+}
+
+
+/* =========================================================
+   TARJETAS
+   ========================================================= */
+
+.card,
+section {
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+
+  box-shadow: var(--shadow);
+
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 16px;
+
+  margin-bottom: 18px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+
+/* =========================================================
+   FORMULARIOS
+   ========================================================= */
+
+form {
+  width: 100%;
+}
+
+form > div {
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  color: var(--text);
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+
+  padding: 9px 11px;
+
+  background: white;
+  color: var(--text);
+
+  border: 1px solid var(--border);
+  border-radius: 6px;
+
+  font: inherit;
+
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+
+  border-color: var(--primary);
+
+  box-shadow:
+    0 0 0 3px rgba(30, 58, 95, 0.12);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+input[readonly] {
+  background: #f1f5f9;
+  color: var(--text-secondary);
+}
+
+input[type="file"] {
+  padding: 8px;
+  background: var(--surface-secondary);
+}
+
+small {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--danger);
+  font-size: 0.8rem;
+}
+
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+button,
+.button {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  min-height: 38px;
+
+  padding: 8px 14px;
+
+  border: none;
+  border-radius: 6px;
+
+  background: var(--primary);
+  color: white;
+
+  font: inherit;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s,
+    transform 0.05s;
+}
+
+button:hover:not(:disabled),
+.button:hover {
+  background: var(--primary-hover);
+  text-decoration: none;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button + button,
+button + a,
+a + button {
+  margin-left: 8px;
+}
+
+
+/* Variantes */
+
+.btn-secondary {
+  background: var(--secondary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #475569;
+}
+
+.btn-success {
+  background: var(--success);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #166534;
+}
+
+.btn-danger {
+  background: var(--danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #991b1b;
+}
+
+.btn-warning {
+  background: var(--warning);
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: #92400e;
+}
+
+.btn-light {
+  background: #e2e8f0;
+  color: var(--text);
+}
+
+.btn-light:hover:not(:disabled) {
+  background: #cbd5e1;
+}
+
+
+/* =========================================================
+   TABLAS
+   ========================================================= */
+
+table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+
+  overflow: hidden;
+
+  box-shadow: var(--shadow);
+}
+
+thead {
+  background: #edf2f7;
+}
+
+th {
+  text-align: left;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  color: #334155;
+
+  padding: 11px 12px;
+
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 10px 12px;
+
+  border-bottom: 1px solid #edf0f4;
+
+  vertical-align: top;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+/* =========================================================
+   TABLAS RESPONSIVAS
+   ========================================================= */
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+
+/* =========================================================
+   DEFINICIONES / DETALLE DOCUMENTO
+   ========================================================= */
+
+dl {
+  display: grid;
+
+  grid-template-columns:
+    minmax(160px, 220px)
+    1fr;
+
+  gap: 8px 20px;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+
+  padding: 18px;
+
+  box-shadow: var(--shadow);
+}
+
+dt {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+dd {
+  margin: 0;
+}
+
+
+/* =========================================================
+   BADGES / ESTADOS
+   ========================================================= */
+
+.badge {
+  display: inline-block;
+
+  padding: 3px 8px;
+
+  border-radius: 999px;
+
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.badge-success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-danger {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-info {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+
+/* =========================================================
+   ESTADOS DEL PIPELINE
+   ========================================================= */
+
+.pipeline {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin: 16px 0;
+}
+
+.pipeline-step {
+  padding: 7px 12px;
+
+  border-radius: 999px;
+
+  background: #e2e8f0;
+
+  color: #475569;
+
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pipeline-step.completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.pipeline-step.current {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.pipeline-step.pending {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+
+/* =========================================================
+   CHUNK EDITOR
+   ========================================================= */
+
+.chunk-editor {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(420px, 1fr);
+
+  gap: 20px;
+
+  align-items: start;
+}
+
+.source-text {
+  white-space: pre-wrap;
+
+  max-height: 650px;
+  overflow-y: auto;
+
+  padding: 16px;
+
+  background: #fafafa;
+
+  border: 1px solid var(--border);
+  border-radius: 6px;
+
+  font-family:
+    "Courier New",
+    monospace;
+
+  font-size: 0.88rem;
+
+  line-height: 1.6;
+}
+
+.chunk-content {
+  min-height: 300px;
+}
+
+
+/* =========================================================
+   CÓDIGO / HASH
+   ========================================================= */
+
+code {
+  font-family:
+    "Courier New",
+    monospace;
+
+  background: #f1f5f9;
+
+  padding: 2px 5px;
+
+  border-radius: 4px;
+
+  font-size: 0.82rem;
+}
+
+td code {
+  overflow-wrap: anywhere;
+}
+
+pre {
+  font-family:
+    "Courier New",
+    monospace;
+}
+
+
+/* =========================================================
+   ALERTAS
+   ========================================================= */
+
+.alert {
+  padding: 12px 15px;
+
+  margin: 12px 0;
+
+  border-radius: 6px;
+
+  border: 1px solid transparent;
+}
+
+.alert-success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.alert-error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.alert-warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.alert-info {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  color: #075985;
+}
+
+
+/* =========================================================
+   UTILIDADES
+   ========================================================= */
+
+.text-muted {
+  color: var(--text-secondary);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mt-1 {
+  margin-top: 8px;
+}
+
+.mt-2 {
+  margin-top: 16px;
+}
+
+.mt-3 {
+  margin-top: 24px;
+}
+
+.mb-1 {
+  margin-bottom: 8px;
+}
+
+.mb-2 {
+  margin-bottom: 16px;
+}
+
+.mb-3 {
+  margin-bottom: 24px;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-between {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.gap-1 {
+  gap: 8px;
+}
+
+.gap-2 {
+  gap: 16px;
+}
+
+
+/* =========================================================
+   SEPARADORES
+   ========================================================= */
+
+hr {
+  border: none;
+
+  border-top: 1px solid var(--border);
+
+  margin: 28px 0;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  main,
+  .container {
+    padding: 16px;
+  }
+
+  .chunk-editor {
+    grid-template-columns: 1fr;
+  }
+
+  dl {
+    grid-template-columns: 1fr;
+  }
+
+  dt {
+    margin-top: 8px;
+  }
+
+  header {
+    padding: 0 16px;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  body {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  button,
+  .button {
+    width: 100%;
+
+    margin:
+      4px 0 !important;
+  }
+
+  .flex-between {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+}

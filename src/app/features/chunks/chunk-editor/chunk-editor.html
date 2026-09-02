@@ -1,0 +1,242 @@
+<h2>
+  Editor de chunks
+</h2>
+
+<div>
+  <h3> 
+    Archivo fuente 
+  </h3>
+
+  @if (files$ | async; as files) {
+    @for ( file of files; track file.id ) {
+      @if (file.current) {
+      <button type="button" (click)="selectSource(file)">
+        {{ file.stage }} - {{ file.filename }}
+      </button>
+      }
+    }
+  }
+</div>
+
+<hr>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+  <section>
+    <h3> 
+      Texto fuente 
+    </h3>
+    <p> Seleccione con el ratón el texto que desea convertir en chunk. </p>
+    <p> {{numTokens}} Tonkens seleccionados</p>
+    <button type="button" (click)="copySelection()">
+      Usar selección como chunk
+    </button>
+
+    <pre style="
+        white-space:pre-wrap;
+        max-height:700px;
+        overflow:auto;
+        border:1px solid #ccc;
+        padding:10px;
+      " 
+      (mouseup)="countTokens()"
+      (keydown)="countTokens()"
+      >{{ sourceText }}</pre>
+  </section>
+
+  <section>
+    <h3>
+      Nuevo chunk
+    </h3>
+
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div>
+        <label> Archivo fuente </label>
+        <input type="text" formControlName="sourceFileId" readonly>
+      </div>
+
+      <div>
+        <label> Página inicial </label>
+        <input type="number" formControlName="pageStart">
+      </div>
+
+      <div>
+        <label> Página final </label>
+        <input type="number" formControlName="pageEnd">
+      </div>
+
+      <div>
+        <label> Capítulo </label>
+        <input type="text" formControlName="chapter">
+      </div>
+
+      <div>
+        <label> Título del capítulo </label>
+        <input type="text" formControlName="chapterTitle">
+      </div>
+
+      <div>
+        <label> Sección </label>
+        <input type="text" formControlName="section">
+      </div>
+
+      <div>
+        <label> Artículo </label>
+        <input type="text" formControlName="article">
+      </div>
+
+      <div>
+        <label> Inciso / subsección </label>
+        <input type="text" formControlName="subsection">
+      </div>
+
+      <div>
+        <label> Contenido </label>
+        <textarea rows="30" cols="50" formControlName="content"></textarea>
+      </div>
+
+      @if (editingChunk) {
+        <hr>
+        <h4> Registro de modificación </h4>
+        <div>
+          <label> Motivo </label>
+          <select [value]="reason" (change)="reason = $any($event.target).value">
+            <option value="ERROR_OCR"> Error OCR </option>
+            <option value="ERROR_TRANSCRIPCION"> Error de transcripción </option>
+            <option value="ERROR_CHUNKING"> Error de chunking </option>
+            <option value="METADATO_INCORRECTO"> Metadato incorrecto </option>
+            <option value="OTRO"> Otro </option>
+          </select>
+        </div>
+
+        <div>
+          <label> Observación </label>
+          <textarea [value]="observation" (input)="observation = $any($event.target).value"></textarea>
+        </div>
+      }
+
+      @if (editingChunk) {
+        <hr>
+        <h4> Registro de modificación </h4>
+        <div>
+          <label> Motivo </label>
+          <select [value]="reason" (change)="reason = $any($event.target).value">
+            <option value="ERROR_OCR"> Error OCR </option>
+            <option value="ERROR_TRANSCRIPCION"> Error de transcripción </option>
+            <option value="ERROR_CHUNKING"> Error de chunking </option>
+            <option value="METADATO_INCORRECTO"> Metadato incorrecto </option>
+            <option value="OTRO"> Otro </option>
+          </select>
+        </div>
+        <div>
+          <label> Observación </label>
+          <textarea [value]="observation" (input)="observation = $any($event.target).value"></textarea>
+        </div>
+      }
+      <button type="submit" [disabled]="saving">
+
+        @if (editingChunk) {
+          Guardar corrección
+        } 
+        @else {
+          Crear chunk
+        }
+      </button>
+      @if (editingChunk) {
+        <button type="button" (click)="cancelEdit()">
+          Cancelar edición
+        </button>
+      }
+    </form>
+  </section>
+</div>
+
+<hr>
+
+<h3>
+  Chunks registrados
+</h3>
+
+
+@if (chunks$ | async; as chunks) {
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Páginas</th>
+        <th>Capítulo</th>
+        <th>Artículo</th>
+        <th>Contenido</th>
+        <th>Activo</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for ( chunk of chunks; track chunk.id ) {
+        <tr>
+          <td>
+            {{ chunk.code }}
+          </td>
+          <td>
+            {{ chunk.pageStart }} - {{ chunk.pageEnd }}
+          </td>
+          <td>
+            {{ chunk.metadata.chapter }}
+          </td>
+          <td>
+            {{ chunk.metadata.article }}
+          </td>
+          <td>
+            {{ chunk.content.length > 150 ? chunk.content.substring(0, 150) + '...' : chunk.content }}
+          </td>
+
+          <td>
+            {{ chunk.active ? 'Sí' : 'No' }}
+          </td>
+
+          <td>
+            <button type="button" (click)="edit(chunk)">
+              Editar
+            </button>
+
+            <button type="button" (click)="historyChunk = chunk">
+              Historial
+            </button>
+
+            @if (chunk.active) {
+
+            <button type="button" (click)="
+              chunkService.deactivate(
+                document.id!,
+                chunk.id!
+              ) 
+            ">
+              Desactivar
+            </button>
+            }
+            @else {
+              <button type="button" (click)="
+                chunkService.activate(
+                  document.id!,
+                  chunk.id!
+                ) 
+              ">
+                Activar
+              </button>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+}
+
+@if ( historyChunk?.id && document.id ) {
+  <hr>
+  <h2>
+    {{ historyChunk?.code }}
+  </h2>
+  <app-chunk-history [documentId]="document.id" [chunkId]="historyChunk!.id!" />
+  <button type="button" (click)="historyChunk = null">
+    Cerrar historial
+  </button>
+}

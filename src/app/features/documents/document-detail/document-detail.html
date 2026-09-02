@@ -1,202 +1,342 @@
 @if (document) {
 
-  <p>
-    <a routerLink="/documents">
-      ← Volver
-    </a>
-  </p>
+<p>
+  <a routerLink="/documents">
+    ← Volver
+  </a>
+</p>
 
 
-  <h1>
-    {{ document.code }}
-  </h1>
+<h1>
+  {{ document.code }}
+</h1>
 
-  <h2>
-    {{ document.title }}
-  </h2>
-
-
-  <dl>
-
-    <dt>Tipo</dt>
-    <dd>
-      {{ document.documentType }}
-    </dd>
-
-    <dt>Año</dt>
-    <dd>
-      {{ document.year }}
-    </dd>
-
-    <dt>Unidad responsable</dt>
-    <dd>
-      {{ document.responsibleUnit || '-' }}
-    </dd>
-
-    <dt>Vigencia</dt>
-    <dd>
-      {{ document.validityStatus }}
-    </dd>
-
-    <dt>Estado de procesamiento</dt>
-    <dd>
-      {{ document.processingStage }}
-    </dd>
-
-  </dl>
+<h2>
+  {{ document.title }}
+</h2>
 
 
-  <p>
-    <a
-      [routerLink]="[
+<dl>
+
+  <dt>Tipo</dt>
+  <dd>
+    {{ document.documentType }}
+  </dd>
+
+  <dt>Año</dt>
+  <dd>
+    {{ document.year }}
+  </dd>
+
+  <dt>Unidad responsable</dt>
+  <dd>
+    {{ document.responsibleUnit || '-' }}
+  </dd>
+
+  <dt>Vigencia</dt>
+  <dd>
+    {{ document.validityStatus }}
+  </dd>
+
+  <dt>Estado de procesamiento</dt>
+  <dd>
+    {{ document.processingStage }}
+  </dd>
+
+</dl>
+
+
+<p>
+  <a [routerLink]="[
         '/documents',
         document.id,
         'edit'
-      ]"
-    >
-      Editar datos
-    </a>
-  </p>
+      ]">
+    Editar datos
+  </a>
+</p>
+
+
+<hr>
+
+
+<hr>
+
+  <h2>
+    Flujo documental
+  </h2>
+
+
+  <section>
+
+    <h3>
+      1. Documento original
+    </h3>
+
+    <p>
+      Archivo original incorporado al corpus.
+    </p>
+
+    <input type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.tif,.tiff"
+      (change)="onFilesSelected($event, 'ORIGINAL')">
+
+    <button type="button" (click)="upload('ORIGINAL')" [disabled]="
+      !hasFilesSelected('ORIGINAL') ||
+      uploadingStage !== null
+    ">
+      Guardar original
+    </button>
+
+  </section>
 
 
   <hr>
 
 
-  <h2>
-    Documento original
-  </h2>
+  <section>
 
-
-  <input
-    type="file"
-    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.tif,.tiff"
-    (change)="onFileSelected($event)"
-  >
-
-
-  @if (selectedFile) {
+    <h3>
+      2. Resultado OCR
+    </h3>
 
     <p>
-      Archivo seleccionado:
-      <strong>
-        {{ selectedFile.name }}
-      </strong>
+      PDF con capa de texto y/o texto extraído.
     </p>
 
+    <input type="file" multiple accept=".pdf,.txt,.json" (change)="onFilesSelected($event, 'OCR')">
+
+    <button type="button" (click)="upload('OCR')" [disabled]="
+      !hasFilesSelected('OCR') ||
+      uploadingStage !== null
+    ">
+      Guardar OCR
+    </button>
+
+  </section>
+
+
+  <hr>
+
+
+  <section>
+
+    <h3>
+      3. Texto limpio
+    </h3>
+
     <p>
-      Tamaño:
-      {{ formatBytes(selectedFile.size) }}
+      Texto corregido y normalizado.
     </p>
+
+    <input type="file" multiple accept=".txt,.md,.json" (change)="onFilesSelected($event, 'CLEAN')">
+
+    <button type="button" (click)="upload('CLEAN')" [disabled]="
+      !hasFilesSelected('CLEAN') ||
+      uploadingStage !== null
+    ">
+      Guardar texto limpio
+    </button>
+
+  </section>
+
+
+  <hr>
+
+
+  <section>
+
+    <h3>
+      4. Documento estructurado
+    </h3>
+
+    <p>
+      Documento con estructura y metadatos.
+    </p>
+
+    <input type="file" multiple accept=".json,.md,.txt" (change)="onFilesSelected($event, 'STRUCTURED')">
+
+    <button type="button" (click)="upload('STRUCTURED')" [disabled]="
+      !hasFilesSelected('STRUCTURED') ||
+      uploadingStage !== null
+    ">
+      Guardar estructurado
+    </button>
+
+  </section>
+
+
+  @if (uploadingStage) {
+
+  <p>
+    Procesando etapa:
+    <strong>
+      {{ uploadingStage }}
+    </strong>
+  </p>
 
   }
-
-
-  <button
-    type="button"
-    (click)="uploadOriginal()"
-    [disabled]="
-      !selectedFile ||
-      uploading
-    "
-  >
-
-    {{
-      uploading
-        ? 'Subiendo...'
-        : 'Guardar original'
-    }}
-
-  </button>
 
 
   @if (errorMessage) {
 
-    <p>
-      {{ errorMessage }}
-    </p>
+  <p>
+    {{ errorMessage }}
+  </p>
 
   }
-
 
   <hr>
 
+<h2>
+  Historial de archivos
+</h2>
 
-  <h2>
-    Archivos registrados
-  </h2>
+
+@if (files$ | async; as files) {
+
+  @if (files.length === 0) {
+
+    <p>
+      No existen archivos registrados.
+    </p>
+
+  } @else {
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>
+            Etapa
+          </th>
+
+          <th>
+            Versión
+          </th>
+
+          <th>
+            Archivo
+          </th>
+
+          <th>
+            Tamaño
+          </th>
+
+          <th>
+            Actual
+          </th>
+
+          <th>
+            Origen
+          </th>
+
+          <th>
+            SHA-256
+          </th>
+
+        </tr>
+
+      </thead>
 
 
-  @if (files$ | async; as files) {
+      <tbody>
 
-    @if (files.length === 0) {
-
-      <p>
-        Todavía no existen archivos.
-      </p>
-
-    } @else {
-
-      <table>
-
-        <thead>
+        @for (
+          file of files;
+          track file.id
+        ) {
 
           <tr>
-            <th>Etapa</th>
-            <th>Versión</th>
-            <th>Archivo</th>
-            <th>Tamaño</th>
-            <th>Actual</th>
-            <th>SHA-256</th>
+
+            <td>
+              {{ file.stage }}
+            </td>
+
+            <td>
+              v{{ file.version }}
+            </td>
+
+            <td>
+                <a
+                  [href]="file.url"
+                  target="_blank"
+                >
+                  {{ file.filename }}
+                </a>
+            </td>
+
+            <td>
+              {{ formatBytes(file.size) }}
+            </td>
+
+            <td>
+              {{
+                file.current
+                  ? 'Sí'
+                  : 'No'
+              }}
+            </td>
+
+            <td>
+
+              @if (
+                file.sourceFileIds.length
+              ) {
+
+                @for (
+                  sourceId
+                  of file.sourceFileIds;
+                  track sourceId
+                ) {
+
+                  <div>
+                    {{ sourceId }}
+                  </div>
+
+                }
+
+              } @else {
+
+                -
+
+              }
+
+            </td>
+
+            <td>
+
+              <code>
+                {{ file.sha256 }}
+              </code>
+
+            </td>
+
           </tr>
 
-        </thead>
+        }
 
+      </tbody>
 
-        <tbody>
-
-          @for (
-            file of files;
-            track file.id
-          ) {
-
-            <tr>
-
-              <td>
-                {{ file.stage }}
-              </td>
-
-              <td>
-                v{{ file.version }}
-              </td>
-
-              <td>
-                {{ file.filename }}
-              </td>
-
-              <td>
-                {{ formatBytes(file.size) }}
-              </td>
-
-              <td>
-                {{ file.current ? 'Sí' : 'No' }}
-              </td>
-
-              <td>
-                <code>
-                  {{ file.sha256 }}
-                </code>
-              </td>
-
-            </tr>
-
-          }
-
-        </tbody>
-
-      </table>
-
-    }
+    </table>
 
   }
+
+}
+
+<hr>
+
+<app-document-metadata
+  [document]="document"
+/>
+
+
+<hr>
+
+
+<app-chunk-editor
+  [document]="document"
+/>
 
 }

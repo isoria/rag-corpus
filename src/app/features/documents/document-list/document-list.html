@@ -1,10 +1,16 @@
-<h1>Corpus documental</h1>
+<div class="flex-between mb-2">
+  <h1>Corpus documental</h1>
 
-<p>
-  <a routerLink="/documents/new">
-    Nuevo documento
-  </a>
-</p>
+      <p class="text-muted">
+      Gestión y trazabilidad del corpus normativo.
+    </p>
+  <p>
+    <a routerLink="/documents/new" class="button">
+      Nuevo documento
+    </a>
+  </p>
+</div>
+
 
 @if (documents$ | async; as documents) {
 
@@ -15,6 +21,7 @@
 </p>
 
 } @else {
+<div class="table-container">
 
 <table>
 
@@ -93,11 +100,30 @@
   </tbody>
 
 </table>
-
+</div>
 }
 
 }
 
-@else {
-no hubo conexion
+<button
+  type="button"
+  (click)="exportDataset()"
+  [disabled]="exporting"
+>
+
+  {{
+    exporting
+      ? 'Exportando...'
+      : 'Exportar dataset RAG'
+  }}
+
+</button>
+
+
+@if (exportMessage) {
+
+  <span>
+    {{ exportMessage }}
+  </span>
+
 }

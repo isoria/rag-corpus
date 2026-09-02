@@ -1,0 +1,77 @@
+<h3>
+  Historial de modificaciones
+</h3>
+
+
+@if (
+  revisions$ | async;
+  as revisions
+) {
+
+  @if (
+    revisions.length === 0
+  ) {
+
+    <p>
+      El chunk todavía no ha sido modificado.
+    </p>
+
+  }
+
+
+  @for (
+    revision of revisions;
+    track revision.id
+  ) {
+
+    <article>
+
+      <h4>
+        Revisión {{ revision.revision }}
+      </h4>
+
+      <p>
+        <strong>
+          Motivo:
+        </strong>
+
+        {{ revision.reason }}
+      </p>
+
+      <p>
+        <strong>
+          Observación:
+        </strong>
+
+        {{ revision.observation || '-' }}
+      </p>
+
+      <p>
+        <strong>
+          Páginas:
+        </strong>
+
+        {{ revision.pageStart }}
+        -
+        {{ revision.pageEnd }}
+      </p>
+
+      <p>
+        <strong>
+          Artículo:
+        </strong>
+
+        {{ revision.metadata.article || '-' }}
+      </p>
+
+      <pre
+        style="white-space: pre-wrap"
+      >{{ revision.content }}</pre>
+
+      <hr>
+
+    </article>
+
+  }
+
+}

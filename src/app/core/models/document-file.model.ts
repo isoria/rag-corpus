@@ -8,24 +8,17 @@ export type DocumentFileStage =
 
 export interface DocumentFile {
   id?: string;
-
   documentId: string;
-
   stage: DocumentFileStage;
-
   version: number;
-
   filename: string;
-
   storagePath: string;
-
   mimeType: string;
-
   size: number;
-
   sha256: string;
-
+  sourceFileIds: string[];   //esto es importante
   current: boolean;
-
   createdAt?: Timestamp;
+  url?: string;
 }
+

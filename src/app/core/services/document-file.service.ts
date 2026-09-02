@@ -2,15 +2,16 @@ import { inject, Injectable } from '@angular/core';
 
 import {
   Firestore,
+  addDoc,
   collection,
   collectionData,
   doc,
   getDocs,
+  orderBy,
   query,
   serverTimestamp,
   updateDoc,
-  where,
-  addDoc
+  where
 } from '@angular/fire/firestore';
 
 import {
@@ -19,13 +20,16 @@ import {
   uploadBytes
 } from '@angular/fire/storage';
 
-import { Observable } from 'rxjs';
+import { Observable, forkJoin, from, of, switchMap, map } from 'rxjs';
 
 import {
   DocumentFile,
   DocumentFileStage
 } from '../models/document-file.model';
 
+import {
+  getDownloadURL
+} from '@angular/fire/storage';
 
 @Injectable({
   providedIn: 'root'
@@ -47,37 +51,112 @@ export class DocumentFileService {
       'files'
     );
 
-    return collectionData(
+    const q = query(
       filesRef,
-      {
-        idField: 'id'
+      orderBy('createdAt', 'asc')
+    );
+
+  return (
+    collectionData(q, {
+      idField: 'id'
+    }) as Observable<DocumentFile[]>
+  ).pipe(
+
+    switchMap(files => {
+
+      if (files.length === 0) {
+        return of([]);
       }
-    ) as Observable<DocumentFile[]>;
+
+      return forkJoin(
+        files.map(file => {
+
+          const fileRef = ref(
+            this.storage,
+            file.storagePath
+          );
+
+          return from(
+            getDownloadURL(fileRef)
+          ).pipe(
+            map(url => ({
+              ...file,
+              url
+            }))
+          );
+
+        })
+      );
+        })
+
+  );
   }
 
 
-  async uploadOriginal(
+  async uploadFiles(
     documentId: string,
     documentCode: string,
-    file: File
-  ): Promise<string> {
+    stage: DocumentFileStage,
+    files: File[]
+  ): Promise<void> {
+
+    if (files.length === 0) {
+      return;
+    }
 
     const version =
       await this.getNextVersion(
         documentId,
-        'ORIGINAL'
+        stage
       );
+
+    const sourceFileIds =
+      await this.getPreviousStageFileIds(
+        documentId,
+        stage
+      );
+
+    await this.markPreviousAsNotCurrent(
+      documentId,
+      stage
+    );
+
+    for (const file of files) {
+
+      await this.uploadSingleFile(
+        documentId,
+        documentCode,
+        stage,
+        version,
+        file,
+        sourceFileIds
+      );
+    }
+
+    await this.updateDocumentStage(
+      documentId,
+      stage
+    );
+  }
+
+
+  private async uploadSingleFile(
+    documentId: string,
+    documentCode: string,
+    stage: DocumentFileStage,
+    version: number,
+    file: File,
+    sourceFileIds: string[]
+  ): Promise<void> {
 
     const sha256 =
       await this.calculateSha256(file);
 
-    await this.markPreviousAsNotCurrent(
-      documentId,
-      'ORIGINAL'
-    );
+    const stageDirectory =
+      stage.toLowerCase();
 
     const storagePath =
-      `corpus/${documentCode}/original/v${version}/${file.name}`;
+      `corpus/${documentCode}/${stageDirectory}/v${version}/${file.name}`;
 
     const storageRef =
       ref(
@@ -90,12 +169,13 @@ export class DocumentFileService {
       file,
       {
         contentType:
-          file.type || 'application/octet-stream',
+          file.type ||
+          'application/octet-stream',
 
         customMetadata: {
           documentId,
           documentCode,
-          stage: 'ORIGINAL',
+          stage,
           version: String(version),
           sha256
         }
@@ -109,13 +189,11 @@ export class DocumentFileService {
       'files'
     );
 
-    const result = await addDoc(
+    await addDoc(
       filesRef,
       {
         documentId,
-
-        stage: 'ORIGINAL',
-
+        stage,
         version,
 
         filename:
@@ -124,22 +202,22 @@ export class DocumentFileService {
         storagePath,
 
         mimeType:
-          file.type || 'application/octet-stream',
+          file.type ||
+          'application/octet-stream',
 
         size:
           file.size,
 
         sha256,
 
-        current:
-          true,
+        sourceFileIds,
+
+        current: true,
 
         createdAt:
           serverTimestamp()
       }
     );
-
-    return result.id;
   }
 
 
@@ -214,26 +292,135 @@ export class DocumentFileService {
     const snapshot =
       await getDocs(q);
 
-    for (
-      const fileSnapshot
-      of snapshot.docs
-    ) {
+    const promises =
+      snapshot.docs.map(
+        item => {
 
-      const fileRef = doc(
-        this.firestore,
-        'documents',
-        documentId,
-        'files',
-        fileSnapshot.id
-      );
+          const fileRef = doc(
+            this.firestore,
+            'documents',
+            documentId,
+            'files',
+            item.id
+          );
 
-      await updateDoc(
-        fileRef,
-        {
-          current: false
+          return updateDoc(
+            fileRef,
+            {
+              current: false
+            }
+          );
         }
       );
+
+    await Promise.all(promises);
+  }
+
+
+  private previousStage(
+    stage: DocumentFileStage
+  ): DocumentFileStage | null {
+
+    switch (stage) {
+
+      case 'OCR':
+        return 'ORIGINAL';
+
+      case 'CLEAN':
+        return 'OCR';
+
+      case 'STRUCTURED':
+        return 'CLEAN';
+
+      default:
+        return null;
     }
+  }
+
+
+  private async getPreviousStageFileIds(
+    documentId: string,
+    stage: DocumentFileStage
+  ): Promise<string[]> {
+
+    const previous =
+      this.previousStage(stage);
+
+    if (!previous) {
+      return [];
+    }
+
+    const filesRef = collection(
+      this.firestore,
+      'documents',
+      documentId,
+      'files'
+    );
+
+    const q = query(
+      filesRef,
+
+      where(
+        'stage',
+        '==',
+        previous
+      ),
+
+      where(
+        'current',
+        '==',
+        true
+      )
+    );
+
+    const snapshot =
+      await getDocs(q);
+
+    return snapshot.docs.map(
+      item => item.id
+    );
+  }
+
+
+  private async updateDocumentStage(
+    documentId: string,
+    stage: DocumentFileStage
+  ): Promise<void> {
+
+    const stageMap: Record<
+      DocumentFileStage,
+      string
+    > = {
+
+      ORIGINAL:
+        'INGESTED',
+
+      OCR:
+        'OCR',
+
+      CLEAN:
+        'CLEAN',
+
+      STRUCTURED:
+        'METADATA'
+    };
+
+    const documentRef = doc(
+      this.firestore,
+      'documents',
+      documentId
+    );
+
+    await updateDoc(
+      documentRef,
+      {
+        processingStage:
+          stageMap[stage],
+
+        updatedAt:
+          serverTimestamp()
+      }
+    );
   }
 
 
@@ -263,5 +450,33 @@ export class DocumentFileService {
             .padStart(2, '0')
       )
       .join('');
+  }
+
+  async readTextFile(
+    storagePath: string
+  ): Promise<string> {
+
+    const storageRef =
+      ref(
+        this.storage,
+        storagePath
+      );
+
+    const url =
+      await getDownloadURL(
+        storageRef
+      );
+
+    const response =
+      await fetch(url);
+
+    if (!response.ok) {
+
+      throw new Error(
+        'No se pudo leer el archivo.'
+      );
+    }
+
+    return response.text();
   }
 }

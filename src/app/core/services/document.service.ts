@@ -19,6 +19,10 @@ import {
   CorpusDocumentInput
 } from '../models/corpus-document.model';
 
+import {
+  DocumentMetadata
+} from '../models/document-metadata.model';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -134,4 +138,29 @@ export class DocumentService {
       }
     );
   }
+
+  async updateMetadata(
+  documentId: string,
+  metadata: DocumentMetadata
+): Promise<void> {
+
+  const documentRef = doc(
+    this.firestore,
+    'documents',
+    documentId
+  );
+
+  await updateDoc(
+    documentRef,
+    {
+      metadata,
+
+      processingStage:
+        'METADATA',
+
+      updatedAt:
+        serverTimestamp()
+    }
+  );
+}
 }

@@ -172,9 +172,9 @@ export class DocumentForm implements OnInit {
 
       } else {
 
-        // await this.documentService.create(
-        //   data
-        // );
+        await this.documentService.create(
+          data
+        );
       }
 
       await this.router.navigate([
