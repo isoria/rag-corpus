@@ -21,7 +21,11 @@ import {
 
 import {
   Chunk,
-  ChunkMetadata
+  ChunkCleanSource,
+  ChunkCreationMethod,
+  ChunkMetadata,
+  ChunkSourceSpan,
+  ChunkStructuredSource
 } from '../models/chunk.model';
 
 import {
@@ -31,15 +35,21 @@ import {
 
 
 export interface ChunkInput {
-
   sourceFileId: string;
 
   sequence?: number;
 
   content: string;
 
-  pageStart: number | null;
+  creationMethod: ChunkCreationMethod;
 
+  cleanSource?: ChunkCleanSource;
+
+  structuredSource?: ChunkStructuredSource | null;
+
+  sourceSpans?: ChunkSourceSpan[];
+
+  pageStart: number | null;
   pageEnd: number | null;
 
   metadata: ChunkMetadata;
@@ -140,9 +150,9 @@ export class ChunkService {
         const next =
           counterSnapshot.exists()
             ? Number(
-                counterSnapshot
-                  .data()['last'] ?? 0
-              ) + 1
+              counterSnapshot
+                .data()['last'] ?? 0
+            ) + 1
             : 1;
 
 
@@ -176,8 +186,19 @@ export class ChunkService {
           chunkRef,
           {
             code,
-
             documentId,
+
+            creationMethod:
+              input.creationMethod,
+
+            cleanSource:
+              input.cleanSource,
+
+            structuredSource:
+              input.structuredSource ?? null,
+
+            sourceSpans:
+              input.sourceSpans,
 
             sourceFileId:
               input.sourceFileId,
@@ -297,6 +318,23 @@ export class ChunkService {
         transaction.set(
           revisionRef,
           {
+            creationMethod:
+              current.creationMethod ??
+              'CLEAN_SELECTION',
+
+            cleanSource:
+              current.cleanSource ?? {
+                fileId: current.sourceFileId,
+                fileVersion: 1,
+                sha256: null
+              },
+
+            structuredSource:
+              current.structuredSource ?? null,
+              
+            sourceSpans:
+              current.sourceSpans ?? [],
+
             revision:
               current.revision,
 
@@ -340,6 +378,18 @@ export class ChunkService {
         transaction.update(
           chunkRef,
           {
+            creationMethod:
+              input.creationMethod,
+
+            cleanSource:
+              input.cleanSource,
+
+            structuredSource:
+              input.structuredSource,
+
+            sourceSpans:
+              input.sourceSpans,
+
             sourceFileId:
               input.sourceFileId,
 

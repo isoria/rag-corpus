@@ -1,5 +1,11 @@
 import { Timestamp } from '@angular/fire/firestore';
-import { ChunkMetadata } from './chunk.model';
+import {
+  ChunkCleanSource,
+  ChunkCreationMethod,
+  ChunkMetadata,
+  ChunkSourceSpan,
+  ChunkStructuredSource
+} from './chunk.model';
 
 export type ChunkRevisionReason =
   | 'ERROR_OCR'
@@ -21,4 +27,12 @@ export interface ChunkRevision {
   reason: ChunkRevisionReason;
   observation: string | null;
   createdAt?: Timestamp;
+
+  creationMethod: ChunkCreationMethod;
+
+  cleanSource?: ChunkCleanSource;
+
+  structuredSource?: ChunkStructuredSource | null;
+
+  sourceSpans?: ChunkSourceSpan[];
 }

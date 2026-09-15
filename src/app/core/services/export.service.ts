@@ -111,6 +111,18 @@ export class ExportService {
 
             metadata: {
 
+              creation_method:
+                chunk.creationMethod,
+
+              clean_source:
+                chunk.cleanSource,
+
+              structured_source:
+                chunk.structuredSource,
+
+              source_spans:
+                chunk.sourceSpans,
+
               document_id:
                 documentSnapshot.id,
 

@@ -7,16 +7,116 @@
     Archivo fuente 
   </h3>
 
-  @if (files$ | async; as files) {
-    @for ( file of files; track file.id ) {
-      @if (file.current) {
-      <button type="button" (click)="selectSource(file)">
-        {{ file.stage }} - {{ file.filename }}
+@if (files$ | async; as files) {
+
+  <h4>
+    Texto limpio
+  </h4>
+
+  @for (file of files; track file.id) {
+
+    @if (
+      file.current &&
+      file.stage === 'CLEAN'
+    ) {
+
+      <button
+        type="button"
+        (click)="selectSource(file)"
+      >
+        {{ file.filename }}
       </button>
-      }
     }
   }
+
+
+  <h4>
+    JSON estructurado
+  </h4>
+
+  @for (file of files; track file.id) {
+
+    @if (
+      file.current &&
+      file.stage === 'STRUCTURED'
+    ) {
+
+      <button
+        type="button"
+        (click)="selectStructuredSource(file)"
+      >
+        {{ file.filename }}
+      </button>
+    }
+  }
+}
 </div>
+
+@if (
+  sourceMode === 'STRUCTURED' &&
+  structuredNodes.length
+) {
+
+  <section>
+
+    <h3>
+      Nodos del documento estructurado
+    </h3>
+
+    <p>
+      Seleccione los artículos o incisos
+      que formarán el chunk.
+    </p>
+
+    @for (
+      item of structuredNodes;
+      track item.node.id
+    ) {
+
+      <label
+        style="
+          display:block;
+          margin-bottom:8px;
+        "
+      >
+
+        <input
+          type="checkbox"
+          [checked]="item.selected"
+          (change)="
+            item.selected =
+              $any($event.target).checked
+          "
+        >
+
+        <strong>
+          {{ item.node.id }}
+        </strong>
+
+        —
+
+        {{ item.path.join(' / ') }}
+
+        <small>
+          páginas
+          {{ item.node.source.page_start }}
+          -
+          {{ item.node.source.page_end }}
+        </small>
+
+      </label>
+    }
+
+    <button
+      type="button"
+      (click)="buildChunkFromSelectedNodes()"
+    >
+      Usar nodos seleccionados como chunk
+    </button>
+
+  </section>
+}
+
 
 <hr>
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
